@@ -20,6 +20,7 @@ public class SecuredHelloController {
     @GetMapping("/hello")
     public String hello() {
         asyncService.asyncMethod();
+        asyncService.virtualThread();
 
         return "Secured Hello!";
     }
