@@ -27,6 +27,9 @@ public class TaskExecutorConfig {
         threadPoolTaskExecutor.setThreadNamePrefix("MyAsyncThread-");
         threadPoolTaskExecutor.setRejectedExecutionHandler(this::logRejection);
         threadPoolTaskExecutor.initialize();
+
+        // If you want to use SecurityContextHolder passed with @Async everytime, you change your configuration and
+        // use DelegatingSecurityContextAsyncTaskExecutor.
         return new DelegatingSecurityContextAsyncTaskExecutor(threadPoolTaskExecutor);
     }
 

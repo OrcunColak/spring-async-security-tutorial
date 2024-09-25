@@ -8,15 +8,19 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.CompletableFuture;
+
 @Service
 @Slf4j
 public class AsyncService {
 
     @Async
-    public void asyncMethod() {
+    public CompletableFuture<String> asyncMethod() {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         Authentication authentication = securityContext.getAuthentication();
         log.info("asyncMethod Authentication : {}", authentication);
+
+        return CompletableFuture.completedFuture("asyncMethod completed");
     }
 
     public void virtualThread() {

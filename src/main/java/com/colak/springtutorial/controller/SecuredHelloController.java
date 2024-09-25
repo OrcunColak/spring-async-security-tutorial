@@ -19,8 +19,10 @@ public class SecuredHelloController {
     // http://localhost:8080/api/v1/secured/hello
     @GetMapping("/hello")
     public String hello() {
-        asyncService.asyncMethod();
-        asyncService.virtualThread();
+        // Asynchronous ordering problem
+        // Run asyncMethod and then run virtualThread
+        asyncService.asyncMethod()
+                .thenRun(asyncService::virtualThread);
 
         return "Secured Hello!";
     }
