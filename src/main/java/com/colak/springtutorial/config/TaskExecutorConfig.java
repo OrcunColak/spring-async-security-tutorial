@@ -15,6 +15,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Slf4j
 public class TaskExecutorConfig {
 
+    private static final int AWAIT_TERMINATION_SECONDS = 90;
+
     @Bean
     public Executor taskExecutor() {
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
@@ -26,10 +28,26 @@ public class TaskExecutorConfig {
         threadPoolTaskExecutor.setQueueCapacity(500);
         threadPoolTaskExecutor.setThreadNamePrefix("MyAsyncThread-");
         threadPoolTaskExecutor.setRejectedExecutionHandler(this::logRejection);
+
+        threadPoolTaskExecutor.setWaitForTasksToCompleteOnShutdown(true);
+        threadPoolTaskExecutor.setAwaitTerminationSeconds(AWAIT_TERMINATION_SECONDS);
+
         threadPoolTaskExecutor.initialize();
 
-        // If you want to use SecurityContextHolder passed with @Async everytime, you change your configuration and
-        // use DelegatingSecurityContextAsyncTaskExecutor.
+        return threadPoolTaskExecutor;
+    }
+
+    // If you want to use SecurityContextHolder passed with @Async everytime, you change your configuration and
+    // use DelegatingSecurityContextAsyncTaskExecutor.
+
+    // See https://medium.com/@office.yeon/graceful-shutdown-in-spring-boot-with-sync-and-async-tasks-a8f8d89ee252
+    // It’s crucial to note that the shutdown method is invoked from the destroy method, which is overridden from DisposableBean.
+    // This implies that you must define ThreadPoolTaskExecutor as its own bean when employing DelegatingSecurityContextExecutor.
+    // Failure to do so, will result in the shutdown method not being properly called during the Spring bean's lifecycle,
+    // potentially causing the executor not to shut down as expected.
+    @Bean
+    public Executor taskExecutor(ThreadPoolTaskExecutor threadPoolTaskExecutor) {
+        // return new DelegatingSecurityContextExecutor(threadPoolTaskExecutor);
         return new DelegatingSecurityContextAsyncTaskExecutor(threadPoolTaskExecutor);
     }
 
